@@ -162,9 +162,7 @@ Enter a message to be sent to server : hai
 ********************************************************************************
 
 
-Distance Vector Routing in this
-program is implemented using
-Bellman Ford Algorithm:-
+                                      DISTANCE VECTOR ROUTING
 
 #include<stdio.h>
 
@@ -221,6 +219,262 @@ printf("\t\n node %d via %d Distance %d",j+1,rt[i].from[j]+1,rt[i].dist[j]);
 }
 printf)("\n\n");
 getch();
+}
+
+
+                            FILE TRANSFER PROTOCOL
+			    
+SERVER:
+
+#include<stdio.h>
+#include<arpa/inet.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<netdb.h>
+#include<stdlib.h>
+#include<string.h>
+#include<unistd.h>
+#define SERV_TCP_PORT 5035
+#define MAX 60
+int i, j, tem;
+char buff[4096], t;
+FILE *f1;
+int main(int afg, char *argv)
+{
+       int sockfd, newsockfd, clength;
+       struct sockaddr_in serv_addr,cli_addr;
+       char t[MAX], str[MAX];
+       strcpy(t,"exit");
+       sockfd=socket(AF_INET, SOCK_STREAM,0);
+       serv_addr.sin_family=AF_INET;
+       serv_addr.sin_addr.s_addr=INADDR_ANY;
+       serv_addr.sin_port=htons(SERV_TCP_PORT);
+       printf("\nBinded");
+       bind(sockfd,(struct sockaddr*)&serv_addr, sizeof(serv_addr));
+       printf("\nListening...");
+       listen(sockfd, 5);
+       clength=sizeof(cli_addr);
+       newsockfd=accept(sockfd,(struct sockaddr*) &cli_addr,&clength);
+       close(sockfd);
+       read(newsockfd, &str, MAX);
+       printf("\nClient message\n File Name : %s\n", str);
+       f1=fopen(str, "r");
+       while(fgets(buff, 4096, f1)!=NULL)
+       {
+            write(newsockfd, buff,MAX);
+            printf("\n");
+       }
+       fclose(f1);
+       printf("\nFile Transferred\n");
+       return 0;
+}
+
+CLIENT:
+
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<netdb.h>
+#include<stdlib.h>
+#include<string.h>
+#include<unistd.h>
+#define SERV_TCP_PORT 5035
+#define MAX 60
+int main(int arg,char*argv[])
+{
+       int sockfd,n;
+       struct sockaddr_in serv_addr;
+       struct hostent*server;
+       char send[MAX],recvline[MAX],s[MAX],name[MAX];
+       sockfd=socket(AF_INET,SOCK_STREAM,0);
+       serv_addr.sin_family=AF_INET;
+       serv_addr.sin_addr.s_addr=inet_addr("127.0.0.1");
+       serv_addr.sin_port=htons(SERV_TCP_PORT);
+       connect(sockfd,(struct sockaddr*)&serv_addr,sizeof(serv_addr));
+       printf("\nEnter the source file name : \n");
+       scanf("%s",send);
+       write(sockfd,send,MAX);
+       while((n=read(sockfd,recvline,MAX))!=0)
+       {
+          printf("%s",recvline);
+       }
+       close(sockfd);
+       return 0;
+}
+
+       
+                           SLIDING WINDOW:
+		 
+STOP AND WAIT:
+
+#include<stdio.h>
+
+#define MAXSIZE 100
+typedef struct
+{
+unsigned char data[MAXSIZE];
+}packet;
+typedef enum{data,ack}frame_kind;
+typedef struct
+{
+    frame_kind kind;
+    int sq_no;
+    int ack;
+    packet info;
+}frame;
+typedef enum{frame_arrival}event_type;
+typedef enum{true_false}boolean;
+void frame_network_layer(packet *p)
+{
+    printf("\n from network arrival");
+}
+void to_physical_layer(frame *f)
+{
+    printf("\n to physical layer");
+}
+void wait_for_event(event_type *e)
+{
+    printf("\n waiting for event n");
+}
+void sender(void)
+{
+    frame s;
+    packet buffer;
+    event_type event;
+    printf("\n ***SENDER***");
+    frame_network_layer(&buffer);
+    s.info=buffer;
+    to_physical_layer(&s);
+    wait_for_event(&event);
+}
+void from_physical_layer(frame *f)
+{
+    printf("from physical layer");
+}
+void to_network_layer(packet *p)
+{
+    printf("\n to network layer");
+}
+void receiver(void)
+{
+    frame r,s;
+    event_type event;
+    printf("\n ***RECEIVER***");
+    wait_for_event(&event);
+    from_physical_layer(&r);
+    to_network_layer(&r.info);
+    to_physical_layer(&s);
+}
+int main()
+{
+    sender();
+    receiver();
+return (0);
+}
+
+GO BACK N:
+
+#include<stdio.h>
+int main()
+{
+	int windowsize,sent=0,ack,i;
+	printf("enter window size\n");
+	scanf("%d",&windowsize);
+	while(1)
+	{
+		for( i = 0; i < windowsize; i++)
+			{
+				printf("Frame %d has been transmitted.\n",sent);
+				sent++;
+				if(sent == windowsize)
+					break;
+			}
+			printf("\nPlease enter the last Acknowledgement received.\n");
+			scanf("%d",&ack);
+			
+			if(ack == windowsize-1)
+				break;
+			else
+				sent = ack+1;
+	}
+return 0;
+}
+
+SELECTIVE REPEAT:
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<unistd.h>
+int n,r;
+struct frame
+{
+char ack;
+int data;
+}frm[10];
+int sender(void);
+void recvack(void);
+void resend(void);
+void resend1(void);
+void goback(void);
+void selective(void);
+int main()
+{
+int c;
+do
+{
+printf("\n\n1.Selective repeat ARQ\n2.exit");
+printf("\nEnter your choice:");
+scanf("%d",&c);
+switch(c)
+{
+case 1:selective();
+break;
+case 2:exit(0);
+break;
+}
+}while(c>=3);
+}
+void selective()
+{
+sender();
+recvack();
+resend();
+printf("\nAll packets sent successfully");
+}
+int sender()
+{
+int i;
+printf("\nEnter the no. of packets to be sent:");
+scanf("%d",&n);
+for(i=1;i<=n;i++)
+{
+printf("\nEnter data for packets[%d]",i);
+scanf("%d",&frm[i].data);
+frm[i].ack='y';
+}
+return 0;
+}
+void recvack()
+{
+int i;
+rand();
+r=rand()%n;
+frm[r].ack='n';
+for(i=1;i<=n;i++)
+{
+if(frm[i].ack=='n')
+printf("\nThe packet number %d is not received\n",r);
+}
+}
+void resend() //SELECTIVE REPEAT
+{
+printf("\nresending packet %d",r);
+sleep(2);
+frm[r].ack='y';
+printf("\nThe received packet is %d",frm[r].data);
 }
 
 
