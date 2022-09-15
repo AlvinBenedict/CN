@@ -478,3 +478,122 @@ printf("\nThe received packet is %d",frm[r].data);
 }
 
 
+                                    MULTI-USER CHAT SYSTEM
+				    
+CLIENT:
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<string.h>
+#include<netinet/in.h>
+#define PORT 4444
+#define BUF_SIZE 2000
+int main(int argc, char**argv) 
+{
+struct sockaddr_in addr, cl_addr;
+int sockfd, ret;
+char buffer[BUF_SIZE];
+struct hostent * server;
+char * serverAddr;
+if (argc < 2) {
+printf("usage: client < ip address >\n");
+exit(1);
+}
+serverAddr = argv[1];
+sockfd = socket(AF_INET,SOCK_STREAM, 0);
+if(sockfd<0) 
+{
+printf("Error creating socket!\n");
+exit(1);
+}
+printf("Socket created...\n");
+memset(&addr, 0, sizeof(addr));
+addr.sin_family = AF_INET;
+addr.sin_addr.s_addr = inet_addr(serverAddr);
+addr.sin_port = PORT;
+ret = connect(sockfd, (struct sockaddr *) &addr, sizeof(addr));
+if (ret < 0) {
+printf("Error connecting to the server!\n");
+exit(1); }
+printf("Connected to the server...\n");
+memset(buffer, 0, BUF_SIZE);
+printf("Enter your message(s): ");
+while (fgets(buffer, BUF_SIZE, stdin) != NULL) {
+ret = send(sockfd, buffer, BUF_SIZE, 0);
+if (ret < 0) {
+printf("Error sending data!\n\t-%s", buffer);
+}
+ret = recv(sockfd, buffer, BUF_SIZE, 0);
+if (ret < 0) {
+printf("Error receiving data!\n");
+}
+else
+{
+printf("Received: ");
+fputs(buffer, stdout);
+printf("\n"); }
+}
+return 0; }
+
+SERVER:
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<string.h>
+#include<netinet/in.h>
+#define PORT 4444
+#define BUF_SIZE 2000
+#define CLADDR_LEN 100
+void main() {
+struct sockaddr_in addr, cl_addr;
+int sockfd, len, ret, newsockfd;
+char buffer[BUF_SIZE];
+pid_t childpid;
+char clientAddr[CLADDR_LEN];
+sockfd = socket(AF_INET, SOCK_STREAM, 0);
+if (sockfd < 0) {
+printf("Error creating socket!\n");
+exit(1);
+}
+printf("Socket created...\n");
+memset(&addr, 0, sizeof(addr));
+addr.sin_family = AF_INET;
+addr.sin_addr.s_addr = INADDR_ANY;
+addr.sin_port = PORT;
+ret = bind(sockfd, (struct sockaddr *) &addr, sizeof(addr));
+if (ret < 0) {
+printf("Error binding!\n");
+exit(1); }
+printf("Binding done...\n");
+printf("Waiting for a connection...\n");
+listen(sockfd, 5);
+for (;;) { 
+len = sizeof(cl_addr);
+newsockfd = accept(sockfd, (struct sockaddr *) &cl_addr, &len);
+if (newsockfd < 0) {
+printf("Error accepting connection!\n");
+exit(1);
+}
+printf("Connection accepted...\n");
+inet_ntop(AF_INET, &(cl_addr.sin_addr), clientAddr, CLADDR_LEN);
+if ((childpid = fork()) == 0) { 
+close(sockfd);
+for (;;) {
+memset(buffer, 0, BUF_SIZE);
+ret = recv(newsockfd, buffer, BUF_SIZE, 0);
+if(ret < 0) {
+printf("Error receiving data!\n");
+exit(1); }
+printf("Received data from %s: %s\n", clientAddr, buffer);
+ret = send(newsockfd, buffer, BUF_SIZE, 0);
+if (ret < 0) {
+printf("Error sending data!\n");
+exit(1);
+}
+printf("Sent data to %s: %s\n", clientAddr, buffer);
+} } close(newsockfd);
+}}
