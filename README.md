@@ -1,599 +1,553 @@
-# CN
-		     CLIENT SERVER COMMUNICATION - TCP
-
-CLIENT
-
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <string.h>
-#include<stdlib.h>
-int main()
-{
-char buf[100];
-int k;
-int sock_desc;
-struct sockaddr_in client;
-sock_desc=socket(AF_INET,SOCK_STREAM,0);
-if(sock_desc==-1)
-printf("error in socket creation");
-client.sin_family=AF_INET;
-client.sin_addr.s_addr=INADDR_ANY;
-client.sin_port=3003;
-k=connect(sock_desc,(struct sockaddr*)&client,sizeof(client));
-if(k==-1)
-printf("error in connecting to server");
-printf("\nenter data to be send:");
-fgets(buf,100,stdin);
-k=send(sock_desc,buf,100,0);
-printf("error in sending");
-close(sock_desc);
-return 0;
-}
-
-
-SERVER
-#include<sys/socket.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-int main()
-{
-char buf[100];
-int k;
-socklen_t len;
-int sock_desc,temp_sock_desc;
-struct sockaddr_in server,client;
-sock_desc=socket(AF_INET,SOCK_STREAM,0);
-if(sock_desc==-1)
-printf("enter in socketcreation");
-server.sin_family=AF_INET;
-server.sin_addr.s_addr=INADDR_ANY;
-server.sin_port=3003;
-client.sin_family=AF_INET;
-client.sin_addr.s_addr=INADDR_ANY;
-client.sin_port=3003;
-k=bind(sock_desc,(struct sockaddr*)&server,sizeof(server));
-if(k==-1)
-printf("error in binding");
-k=listen(sock_desc,5);
-if(k==-1)
-printf("error in listening");
-len=sizeof(client);
-temp_sock_desc=accept(sock_desc,(struct sockaddr*)&client,&len);
-if(temp_sock_desc==-1)
-printf("error in temporary socket creation");
-k=recv(temp_sock_desc,buf,100,0);
-if(k==-1)
-printf("error is receiving");
-printf("message got from client : %s",buf);
-close(temp_sock_desc);
-return 0;
-}
-
-OUTPUT
-
-CLIENT
-student@student-OptiPlex-3020:~/Desktop/network$ ./cli
-enter data to be send: hello
-error in sendingstudent@student-OptiPlex-3020:~/Desktop/network$
-
-SERVER
-student@student-OptiPlex-3020:~/Desktop/network$ ./sev
-message got from client: hello
-student@student-OptiPlex-3020:~/Desktop/network$ ^C
-
-
-                       CLIENT-SERVER COMMUNICATION -UDP
-                                                                                          
-CLIENT
+                                                                RECURSIVE DESCENT PARSER-I
 
 #include<stdio.h>
-#include<string.h>
-#include<sys/socket.h>
-#include<stdlib.h>
-#include<netdb.h>
-int main(int argc,char* argv[])
-{
-    struct sockaddr_in server,client;
-    if(argc!=3)
-    printf("Input format not correct");
-    int sockfd=socket(AF_INET,SOCK_DGRAM,0);
-    if(sockfd==-1)
-    printf("Error in socket();");
-    server.sin_family=AF_INET;
-    server.sin_addr.s_addr=INADDR_ANY;
-    server.sin_port=htons(atoi(argv[2]));
-    char buffer[100];
-    printf("Enter a message to be sent to server : ");
-    fgets(buffer,100,stdin);
-    if(sendto(sockfd,buffer,sizeof(buffer),0,(struct sockaddr*)&server,sizeof(server))<0)
-    printf("Error in sendto");
+char str[20];
+int i=0,x,y;
+int A(){
+    if(str[i]=='a'){
+        ++i;
+        if(str[i]=='b'){
+            ++i;
+            return 1;
+        }
+        return 1;
+    }
+    return 0;
+}    
+int S(){
+    if(str[i]=='a'){
+        ++i;
+        y=A();
+        if(y==1 && str[i]=='d')
+            return 1;
+        else
+            return 0;
+    }
     return 0;
 }
 
-********************************************************************************
-
-SERVER
-
-
-#include<stdio.h>
-#include<string.h>
-#include<sys/socket.h>
-#include<stdlib.h>
-#include<netdb.h>
-int main(int argc,char* argv[])
-{
-    struct sockaddr_in server,client;
-    if(argc!=2)
-    printf("Input format not correct");
-    int sockfd=socket(AF_INET,SOCK_DGRAM,0);
-    if(sockfd==-1)
-    printf("Error in socket();");
-    server.sin_family=AF_INET;
-    server.sin_addr.s_addr=INADDR_ANY;
-    server.sin_port=htons(atoi(argv[1]));
-    if(bind(sockfd,(struct sockaddr*)&server,sizeof(server))<0)
-    printf("Error in bind()! \n");
-    char buffer[100];
-    socklen_t server_len=sizeof(server);
-    printf("server waiting.....");
-    if(recvfrom(sockfd,buffer,100,0,(struct sockaddr*)&server,&server_len)<0)
-    printf("Error in recvfrom()!");
-    printf("Got a datagram:%s",buffer);
-    return 0;
+int main(){
+    printf("Enter String:");
+    scanf("%s",str);
+    x=S();
+    if(x==1)
+        printf("Accepted");
+    else
+        printf("Not accepted");
 }
 
-********************************************************************************
+
+*************************************************************************
 OUTPUT
+------
 
-SERVER
-student@student-OptiPlex-3010:~/Desktop/networkpgms$ cc udps.c -o sev
-student@student-OptiPlex-3010:~/Desktop/networkpgms$ ./sev 2050
-server waiting.....Got a datagram:hai
+Enter String:aabd
+Accepted
 
-********************************************************************************
-CLIENT
-student@student-OptiPlex-3010:~/Desktop/networkpgms$ cc udpc.c -o cli
-student@student-OptiPlex-3010:~/Desktop/networkpgms$ ./cli localhost 2050
-Enter a message to be sent to server : hai
-
-********************************************************************************
+Enter String:abd
+Not accepted
 
 
-                                      DISTANCE VECTOR ROUTING
+
+							RECURSIVE DESCENT PARSER-II
 
 #include<stdio.h>
-
-struct node
-{
-unsigned dist[20];
-unsigned from[20];
-}rt[1 0];
-int main()
-{
-int costmat[20][20];
-int nodes,ij,k,count=0;
-
-printf("\nEnter the number of nodes : ");
-scanf("%d",&nodes);
-printf("\nEnter the cost matrix:\n");
-
-for(i=0;i<nodes;i++)
-{
-for(j=0;j<nodes;j++)
-{
-scanf("%d",&costmattil[j]);
-costmat[i][i]=0;
-rt[i].dist[]=costmatti][j];//
- 
-initialise the distance equal to cost
-matrix
-
-
-rt{i].from[j]=j;
-}
-}
-do
-{
-count=0;
-for(i=0;i<nodes;i++)
-for(j=0;j<nodes;j++)
-for(k=0;k<nodes;k++)
-if(rt[i].dist[j]>costmat[i][k]+rt|k].dist[j])
-{
-rt{i].dist[j]=rt[i].dist[k]+rt[k].dist[j];
-rt[i].from[j]=k;
-count++;
-
-}while(count!=0);
-for(i=0;i<nodes;i++)
-
-printf("\n\n For router
-%d\n",i+1); |
-for(j=0;j<nodes;j++)
-{
-printf("\t\n node %d via %d Distance %d",j+1,rt[i].from[j]+1,rt[i].dist[j]);
-}
-}
-printf)("\n\n");
-getch();
-}
-
-
-                            FILE TRANSFER PROTOCOL
-			    
-SERVER:
-
-#include<stdio.h>
-#include<arpa/inet.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
-#include<netdb.h>
-#include<stdlib.h>
 #include<string.h>
-#include<unistd.h>
-#define SERV_TCP_PORT 5035
-#define MAX 60
-int i, j, tem;
-char buff[4096], t;
-FILE *f1;
-int main(int afg, char *argv)
-{
-       int sockfd, newsockfd, clength;
-       struct sockaddr_in serv_addr,cli_addr;
-       char t[MAX], str[MAX];
-       strcpy(t,"exit");
-       sockfd=socket(AF_INET, SOCK_STREAM,0);
-       serv_addr.sin_family=AF_INET;
-       serv_addr.sin_addr.s_addr=INADDR_ANY;
-       serv_addr.sin_port=htons(SERV_TCP_PORT);
-       printf("\nBinded");
-       bind(sockfd,(struct sockaddr*)&serv_addr, sizeof(serv_addr));
-       printf("\nListening...");
-       listen(sockfd, 5);
-       clength=sizeof(cli_addr);
-       newsockfd=accept(sockfd,(struct sockaddr*) &cli_addr,&clength);
-       close(sockfd);
-       read(newsockfd, &str, MAX);
-       printf("\nClient message\n File Name : %s\n", str);
-       f1=fopen(str, "r");
-       while(fgets(buff, 4096, f1)!=NULL)
-       {
-            write(newsockfd, buff,MAX);
-            printf("\n");
-       }
-       fclose(f1);
-       printf("\nFile Transferred\n");
-       return 0;
+#include<ctype.h>
+char input[30];
+int i=0,e=0;
+void E();
+void Edash();
+void T();
+void Tdash();
+void F();
+int main(){
+	printf("Enter string:");
+	scanf("%s",input);
+	E();
+	if(strlen(input)==i && e==0)
+		printf("Accepted\n");
+	else	printf("Not Accepted\n");
+	return 0;
 }
-
-CLIENT:
-
-#include<stdio.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
-#include<netdb.h>
-#include<stdlib.h>
-#include<string.h>
-#include<unistd.h>
-#define SERV_TCP_PORT 5035
-#define MAX 60
-int main(int arg,char*argv[])
-{
-       int sockfd,n;
-       struct sockaddr_in serv_addr;
-       struct hostent*server;
-       char send[MAX],recvline[MAX],s[MAX],name[MAX];
-       sockfd=socket(AF_INET,SOCK_STREAM,0);
-       serv_addr.sin_family=AF_INET;
-       serv_addr.sin_addr.s_addr=inet_addr("127.0.0.1");
-       serv_addr.sin_port=htons(SERV_TCP_PORT);
-       connect(sockfd,(struct sockaddr*)&serv_addr,sizeof(serv_addr));
-       printf("\nEnter the source file name : \n");
-       scanf("%s",send);
-       write(sockfd,send,MAX);
-       while((n=read(sockfd,recvline,MAX))!=0)
-       {
-          printf("%s",recvline);
-       }
-       close(sockfd);
-       return 0;
+void E(){
+	T();
+	Edash();
 }
-
-       
-                           SLIDING WINDOW:
-		 
-STOP AND WAIT:
-
-#include<stdio.h>
-
-#define MAXSIZE 100
-typedef struct
-{
-unsigned char data[MAXSIZE];
-}packet;
-typedef enum{data,ack}frame_kind;
-typedef struct
-{
-    frame_kind kind;
-    int sq_no;
-    int ack;
-    packet info;
-}frame;
-typedef enum{frame_arrival}event_type;
-typedef enum{true_false}boolean;
-void frame_network_layer(packet *p)
-{
-    printf("\n from network arrival");
-}
-void to_physical_layer(frame *f)
-{
-    printf("\n to physical layer");
-}
-void wait_for_event(event_type *e)
-{
-    printf("\n waiting for event n");
-}
-void sender(void)
-{
-    frame s;
-    packet buffer;
-    event_type event;
-    printf("\n ***SENDER***");
-    frame_network_layer(&buffer);
-    s.info=buffer;
-    to_physical_layer(&s);
-    wait_for_event(&event);
-}
-void from_physical_layer(frame *f)
-{
-    printf("from physical layer");
-}
-void to_network_layer(packet *p)
-{
-    printf("\n to network layer");
-}
-void receiver(void)
-{
-    frame r,s;
-    event_type event;
-    printf("\n ***RECEIVER***");
-    wait_for_event(&event);
-    from_physical_layer(&r);
-    to_network_layer(&r.info);
-    to_physical_layer(&s);
-}
-int main()
-{
-    sender();
-    receiver();
-return (0);
-}
-
-GO BACK N:
-
-#include<stdio.h>
-int main()
-{
-	int windowsize,sent=0,ack,i;
-	printf("enter window size\n");
-	scanf("%d",&windowsize);
-	while(1)
-	{
-		for( i = 0; i < windowsize; i++)
-			{
-				printf("Frame %d has been transmitted.\n",sent);
-				sent++;
-				if(sent == windowsize)
-					break;
-			}
-			printf("\nPlease enter the last Acknowledgement received.\n");
-			scanf("%d",&ack);
-			
-			if(ack == windowsize-1)
-				break;
-			else
-				sent = ack+1;
+void Edash(){
+	if(input[i]=='+'){
+		i=i+1;
+		T();
+		Edash();
 	}
-return 0;
+	else	return;
+}
+void T(){
+	F();
+	Tdash();
+}
+void Tdash(){
+	if(input[i]=='*'){
+		i++;
+		F();
+		Tdash();
+	}
+	else	return;
 }
 
-SELECTIVE REPEAT:
+void F(){
+	if(input[i]=='('){
+		i++;
+		E();
+		if(input[i]==')')
+			i++;
+		else	e=1;
+	}
+	else if(isalnum(input[i]))
+		i++;
+	else	e=1;
+}
+
+*************************************************************************
+OUTPUT
+------
+Enter string:(5*6)+(6+8)
+Accepted
+
+Enter string:5+(5-8)
+Not Accepted
+
+
+
+								LEXICAL ANALYZER
 
 #include<stdio.h>
-#include<stdlib.h>
+#include<string.h>
+#include<ctype.h>
+void main(){
+    char token[50],c;
+    int i=0;
+    FILE *fp=fopen("input.txt","r");
+    c=fgetc(fp);
+    while(c!=EOF){
+        if(c=='/'){
+            c=getc(fp);
+            if(c=='/'){
+                do{
+                    c=getc(fp);
+                  }while(c!='\n' && c!=EOF);
+            }
+            else{
+                printf("\n/\tOPERATOR");
+            }
+        }
+        else if(isalpha(c) && c!=' ' && c!='\n'){
+            i=0;
+            while(isalpha(c) && c!=' ' && c!='\n'){
+                token[i++]=c;
+                c=fgetc(fp);
+            }
+            token[i]='\0';
+            if(strcmp(token,"void")==0 || strcmp(token,"int")==0 || 
+            	   strcmp(token,"char")==0 || strcmp(token,"float")==0)
+                printf("\n%s\tKEYWORD",token);
+            else
+                printf("\n%s\tIDENTIFIER",token);
+        }
+        else if(c=='=' || c=='+' || c=='-' || c=='*'){
+            printf("\n%c\tOPERATOR",c);
+            c=fgetc(fp);
+        }
+        else if(c=='(' || c==')' || c=='{' || c=='}' || c==';'){
+            printf("\n%c\tSPECIAL CHARACTER",c);
+            c=fgetc(fp);
+        }
+        else if(isdigit(c)&& c!=' ' && c!='\n'){
+            i=0;
+            while(isdigit(c) && c!=' ' && c!='\n')
+            {
+                token[i++]=c;
+                c=fgetc(fp);
+            }
+            token[i]='\0';
+            printf("\n%s\tNUMBER",token);
+        }
+        else
+        {
+            c=fgetc(fp);
+        }
+    }
+    fclose(fp);
+}
+
+*************************************************************************
+
+
+
+
+
+
+
+INPUT FILE(input.txt)
+---------------------
+void main()
+{
+int x=95; //Comment
+print(x);
+}
+
+
+
+
+OUTPUT
+------
+void	KEYWORD
+main	IDENTIFIER
+(	SPECIAL CHARACTER
+)	SPECIAL CHARACTER
+{	SPECIAL CHARACTER
+int	KEYWORD
+x	IDENTIFIER
+=	OPERATOR
+95	NUMBER
+;	SPECIAL CHARACTER
+print	IDENTIFIER
+(	SPECIAL CHARACTER
+x	IDENTIFIER
+)	SPECIAL CHARACTER
+;	SPECIAL CHARACTER
+}	SPECIAL CHARACTER
+
+
+
+								FIRST & FOLLOW
+								
+#include<stdio.h>
 #include<math.h>
-#include<unistd.h>
-int n,r;
-struct frame
-{
-char ack;
-int data;
-}frm[10];
-int sender(void);
-void recvack(void);
-void resend(void);
-void resend1(void);
-void goback(void);
-void selective(void);
-int main()
-{
-int c;
-do
-{
-printf("\n\n1.Selective repeat ARQ\n2.exit");
-printf("\nEnter your choice:");
-scanf("%d",&c);
-switch(c)
-{
-case 1:selective();
-break;
-case 2:exit(0);
-break;
-}
-}while(c>=3);
-}
-void selective()
-{
-sender();
-recvack();
-resend();
-printf("\nAll packets sent successfully");
-}
-int sender()
-{
-int i;
-printf("\nEnter the no. of packets to be sent:");
-scanf("%d",&n);
-for(i=1;i<=n;i++)
-{
-printf("\nEnter data for packets[%d]",i);
-scanf("%d",&frm[i].data);
-frm[i].ack='y';
-}
-return 0;
-}
-void recvack()
-{
-int i;
-rand();
-r=rand()%n;
-frm[r].ack='n';
-for(i=1;i<=n;i++)
-{
-if(frm[i].ack=='n')
-printf("\nThe packet number %d is not received\n",r);
-}
-}
-void resend() //SELECTIVE REPEAT
-{
-printf("\nresending packet %d",r);
-sleep(2);
-frm[r].ack='y';
-printf("\nThe received packet is %d",frm[r].data);
-}
-
-
-                                    MULTI-USER CHAT SYSTEM
-				    
-CLIENT:
-
-#include<stdio.h>
-#include<stdlib.h>
-#include<sys/types.h>
-#include<sys/socket.h>
 #include<string.h>
-#include<netinet/in.h>
-#define PORT 4444
-#define BUF_SIZE 2000
-int main(int argc, char**argv) 
-{
-struct sockaddr_in addr, cl_addr;
-int sockfd, ret;
-char buffer[BUF_SIZE];
-struct hostent * server;
-char * serverAddr;
-if (argc < 2) {
-printf("usage: client < ip address >\n");
-exit(1);
-}
-serverAddr = argv[1];
-sockfd = socket(AF_INET,SOCK_STREAM, 0);
-if(sockfd<0) 
-{
-printf("Error creating socket!\n");
-exit(1);
-}
-printf("Socket created...\n");
-memset(&addr, 0, sizeof(addr));
-addr.sin_family = AF_INET;
-addr.sin_addr.s_addr = inet_addr(serverAddr);
-addr.sin_port = PORT;
-ret = connect(sockfd, (struct sockaddr *) &addr, sizeof(addr));
-if (ret < 0) {
-printf("Error connecting to the server!\n");
-exit(1); }
-printf("Connected to the server...\n");
-memset(buffer, 0, BUF_SIZE);
-printf("Enter your message(s): ");
-while (fgets(buffer, BUF_SIZE, stdin) != NULL) {
-ret = send(sockfd, buffer, BUF_SIZE, 0);
-if (ret < 0) {
-printf("Error sending data!\n\t-%s", buffer);
-}
-ret = recv(sockfd, buffer, BUF_SIZE, 0);
-if (ret < 0) {
-printf("Error receiving data!\n");
-}
-else
-{
-printf("Received: ");
-fputs(buffer, stdout);
-printf("\n"); }
-}
-return 0; }
-
-SERVER:
-
-#include<stdio.h>
+#include<ctype.h>
 #include<stdlib.h>
-#include<sys/types.h>
-#include<sys/socket.h>
+int n,m=0,i=0,j=0;
+char a[10][10],f[10];
+void follow(char c);
+void first(char c);
+void firstT(char c,int x,int y);
+void firstF(char c,char z,int x,int y);
+int main(){
+	int i,z;
+	char c,ch;
+	printf("Enter the no of productions: ");
+	scanf("%d",&n);
+	printf("Enter the productions: ");
+	for(i=0;i<n;i++)
+	scanf("%s%c",a[i],&ch);
+	do{
+		m=0;
+		printf("Enter elemants whose first and follow is to be found:");
+		scanf("%c",&c);
+		first(c);
+		printf("First(%c)= ",c);
+		for(i=0;i<m;i++)
+			printf("%c ",f[i]);
+		printf("\n");
+		strcpy(f,"");
+		m=0;
+		follow(c);
+		printf("Follow(%c)= ",c);
+		for(i=0;i<m;i++)
+			printf("%c ",f[i]);
+		printf("\n\n");
+		printf("Continue(0/1)?");
+		scanf("%d%c",&z,&ch);
+	}while(z==1);
+	return 0;
+}
+void first(char c){
+	int k;
+	if(!isupper(c))
+		f[m++]=c;
+	for(k=0;k<n;k++){
+		if(a[k][0]==c){
+			if(a[k][2]=='#')
+				f[m++]='#';
+			else if(islower(a[k][2]))
+				f[m++]=a[k][2];
+			else
+				firstT(a[k][2],k,3);
+		}
+	}
+}
+void firstT(char c,int x,int y){
+	int k;
+	if(!isupper(c))
+		f[m++]=c;
+	for(k=0;k<n;k++){
+		if(a[k][0]==c){
+			if(a[k][2]=='#'){
+				if(a[x][y]!='\0')
+					firstT(a[x][y],x,y+1);
+				else
+					f[m++]='#';
+			}
+			else if(islower(a[k][2]))
+				f[m++]=a[k][2];
+			else
+				firstT(a[k][2],k,3);
+		}
+	}
+	
+}
+void follow(char c){
+	if(a[0][0]==c)
+		f[m++]='$';
+	for(i=0;i<n;i++) {
+		for(j=2;j<strlen(a[i]);j++){
+			if(a[i][j]==c){
+				if(a[i][j+1]!='\0')
+					firstF(a[i][j+1],a[i][0],i,j+2);
+				if(a[i][j+1]=='\0' && c!=a[i][0])
+					follow(a[i][0]);
+			}
+		}
+	}
+}
+void firstF(char c,char z,int x,int y){
+	int k;
+	if(!isupper(c))
+		f[m++]=c;
+	for(k=0;k<n;k++){
+		if(a[k][0]==c){
+			if(a[k][2]=='#'){
+				if(a[x][y]!='\0')
+					firstF(a[x][y],z,x,y+1);
+				else
+					follow(a[x][0]);
+			}
+			else if(islower(a[k][2]))
+				f[m++]=a[k][2];
+			else
+				firstF(a[k][2],a[k][0],k,3);
+		}
+	}
+	
+}
+
+*************************************************************************
+
+OUTPUT
+------
+
+Enter the no of productions: 8
+Enter the productions: E=TA
+A=+TA
+A=#
+T=FB
+B=*FB
+B=#
+F=(E)
+F=i
+Enter elemants whose first and follow is to be found:E
+First(E)= ( i 
+Follow(E)= $ ) 
+
+Continue(0/1)?1
+Enter elemants whose first and follow is to be found:A
+First(A)= + # 
+Follow(A)= $ ) 
+
+Continue(0/1)?1
+Enter elemants whose first and follow is to be found:T
+First(T)= ( i 
+Follow(T)= + $ ) 
+
+Continue(0/1)?1
+Enter elemants whose first and follow is to be found:B
+First(B)= * # 
+Follow(B)= + $ ) 
+
+Continue(0/1)?1
+Enter elemants whose first and follow is to be found:F
+First(F)= ( i 
+Follow(F)= * + $ ) 
+
+Continue(0/1)?0
+
+
+
+								CONSTANT PROPOAGATION
+								
+#include<stdio.h>
 #include<string.h>
-#include<netinet/in.h>
-#define PORT 4444
-#define BUF_SIZE 2000
-#define CLADDR_LEN 100
-void main() {
-struct sockaddr_in addr, cl_addr;
-int sockfd, len, ret, newsockfd;
-char buffer[BUF_SIZE];
-pid_t childpid;
-char clientAddr[CLADDR_LEN];
-sockfd = socket(AF_INET, SOCK_STREAM, 0);
-if (sockfd < 0) {
-printf("Error creating socket!\n");
-exit(1);
+#include<ctype.h>
+void input();
+void output();
+void change(int p,char *res);
+void constant();
+struct expr{
+	char op[2],op1[5],op2[5],res[5];
+	int flag;
+}arr[10];
+int n;
+void main(){
+	input();
+	constant();
+	output();
 }
-printf("Socket created...\n");
-memset(&addr, 0, sizeof(addr));
-addr.sin_family = AF_INET;
-addr.sin_addr.s_addr = INADDR_ANY;
-addr.sin_port = PORT;
-ret = bind(sockfd, (struct sockaddr *) &addr, sizeof(addr));
-if (ret < 0) {
-printf("Error binding!\n");
-exit(1); }
-printf("Binding done...\n");
-printf("Waiting for a connection...\n");
-listen(sockfd, 5);
-for (;;) { 
-len = sizeof(cl_addr);
-newsockfd = accept(sockfd, (struct sockaddr *) &cl_addr, &len);
-if (newsockfd < 0) {
-printf("Error accepting connection!\n");
-exit(1);
+void input(){
+	int i;
+	printf("\n\nEnter the maximum number of expressions : ");
+	scanf("%d",&n);
+	printf("\nEnter the input : \n");
+	for(i=0;i<n;i++){
+		scanf("%s",arr[i].op);
+		scanf("%s",arr[i].op1);
+		scanf("%s",arr[i].op2);
+		scanf("%s",arr[i].res);
+		arr[i].flag=0;
+	}
 }
-printf("Connection accepted...\n");
-inet_ntop(AF_INET, &(cl_addr.sin_addr), clientAddr, CLADDR_LEN);
-if ((childpid = fork()) == 0) { 
-close(sockfd);
-for (;;) {
-memset(buffer, 0, BUF_SIZE);
-ret = recv(newsockfd, buffer, BUF_SIZE, 0);
-if(ret < 0) {
-printf("Error receiving data!\n");
-exit(1); }
-printf("Received data from %s: %s\n", clientAddr, buffer);
-ret = send(newsockfd, buffer, BUF_SIZE, 0);
-if (ret < 0) {
-printf("Error sending data!\n");
-exit(1);
+void constant(){
+	int i;
+	int op1,op2,res;
+	char op,res1[5];
+	for(i=0;i<n;i++){
+		if(strcmp(arr[i].op,"=")==0){
+			op1=atoi(arr[i].op1);
+			op2=atoi(arr[i].op2);
+			op=arr[i].op[0];
+			res=op1;
+			sprintf(res1,"%d",res);
+			arr[i].flag=1; 
+			change(i,res1);
+		}
+	}
 }
-printf("Sent data to %s: %s\n", clientAddr, buffer);
-} } close(newsockfd);
-}}
+void output(){
+	int i=0;
+	printf("\nOptimized code is : ");
+	for(i=0;i<n;i++){
+		if(!arr[i].flag){
+			printf("\n%s %s %s %s",arr[i].op,
+				arr[i].op1,arr[i].op2,arr[i].res);
+		}
+	}
+}
+void change(int p,char *res){
+	int i;
+	for(i=p+1;i<n;i++){
+		if(strcmp(arr[p].res,arr[i].op1)==0)
+			strcpy(arr[i].op1,res);
+		else if(strcmp(arr[p].res,arr[i].op2)==0)
+			strcpy(arr[i].op2,res);
+	}
+}
+*************************************************************************
+
+OUTPUT
+------
+Enter the maximum number of expressions : 5
+
+Enter the input : 
+= 3 - a
+= 4 - b
++ a b t1
++ a c t2
++ t1 t2 t3
+
+Optimized code is : 
++ 3 4 t1
++ 3 c t2
++ t1 t2 t3
+
+
+
+								SHIFT REDUCE PARSER
+								
+#include<stdio.h>
+#include<string.h>
+int k=0,z=0,i=0,j=0,c=0;
+char a[16],ac[20],stk[15],act[10];
+void check();
+int main(){
+      puts("GRAMMAR is E->E+E \n E->E*E \n E->(E) \n E->id");
+      puts("enter input string ");
+      scanf("%s",a);
+      c=strlen(a);
+      strcpy(act,"SHIFT->");
+      puts("stack \t input \t action");
+      for(k=0,i=0; j<c; k++,i++,j++){
+         if(a[j]=='i' && a[j+1]=='d'){
+              stk[i]=a[j];
+              stk[i+1]=a[j+1];
+              stk[i+2]='\0';
+              a[j]=' ';
+              a[j+1]=' ';
+              printf("\n$%s\t%s$\t%sid",stk,a,act);
+              check();
+         }
+         else{
+              stk[i]=a[j];
+              stk[i+1]='\0';
+              a[j]=' ';
+              printf("\n$%s\t%s$\t%ssymbols",stk,a,act);
+              check();
+         }
+      }
+}
+void check(){
+     strcpy(ac,"REDUCE TO E");
+     for(z=0; z<c; z++)
+       if(stk[z]=='i' && stk[z+1]=='d'){
+           stk[z]='E';
+           stk[z+1]='\0';
+           printf("\n$%s\t%s$\t%s",stk,a,ac);
+           j++;
+       }
+     for(z=0; z<c; z++)
+       if(stk[z]=='E' && stk[z+1]=='+' && stk[z+2]=='E'){
+           stk[z]='E';
+           stk[z+1]='\0';
+           stk[z+2]='\0';
+           printf("\n$%s\t%s$\t%s",stk,a,ac);
+           i=i-2;
+       }
+     for(z=0; z<c; z++)
+       if(stk[z]=='E' && stk[z+1]=='*' && stk[z+2]=='E'){
+           stk[z]='E';
+           stk[z+1]='\0';
+           stk[z+1]='\0';
+           printf("\n$%s\t%s$\t%s",stk,a,ac);
+           i=i-2;
+       }
+     for(z=0; z<c; z++)
+       if(stk[z]=='(' && stk[z+1]=='E' && stk[z+2]==')'){
+           stk[z]='E';
+           stk[z+1]='\0';
+           stk[z+1]='\0';
+           printf("\n$%s\t%s$\t%s",stk,a,ac);
+           i=i-2;
+       }
+}
+*************************************************************************
+
+OUTPUT
+------
+GRAMMAR is E->E+E 
+ E->E*E 
+ E->(E) 
+ E->id
+ 
+enter input string 
+id+id*id
+
+stack 	 input 	 action
+$id	  +id*id$	SHIFT->id
+$E	  +id*id$	REDUCE TO E
+$E+	   id*id$	SHIFT->symbols
+$E+id	     *id$	SHIFT->id
+$E+E	     *id$	REDUCE TO E
+$E	     *id$	REDUCE TO E
+$E*	      id$	SHIFT->symbols
+$E*id	        $	SHIFT->id
+$E*E	        $	REDUCE TO E
+$E	        $	REDUCE TO E
